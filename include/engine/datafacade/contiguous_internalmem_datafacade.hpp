@@ -575,6 +575,8 @@ class ContiguousInternalMemoryDataFacadeBase : public BaseDataFacade
     GetUncompressedForwardDurations(const EdgeID id) const override final
     {
         auto range = segment_data.GetForwardDurations(id);
+        // in gdb find the equivalent of `ptype range` or `info types` for all types
+        // std::cout << "typeid(range).name(): " << typeid(range).name() << std::endl;
         return std::vector<EdgeWeight>{range.begin(), range.end()};
     }
 
@@ -582,7 +584,24 @@ class ContiguousInternalMemoryDataFacadeBase : public BaseDataFacade
     GetUncompressedReverseDurations(const EdgeID id) const override final
     {
         auto range = segment_data.GetReverseDurations(id);
+        // std::cout << "typeid(range).name(): " << typeid(range).name() << std::endl;
         return std::vector<EdgeWeight>{range.begin(), range.end()};
+    }
+
+    virtual forwardRangeT GetUncompressedForwardDurations1(const EdgeID id) const override final
+    {
+        auto range = segment_data.GetForwardDurations(id);
+        // in gdb find the equivalent of `ptype range` or `info types` for all types
+        // std::cout << "typeid(range).name(): " << typeid(range).name() << std::endl;
+        // return std::vector<EdgeWeight>{range.begin(), range.end()};
+        return range;
+    }
+
+    virtual reverseRangeT GetUncompressedReverseDurations1(const EdgeID id) const override final
+    {
+        auto range = segment_data.GetReverseDurations(id);
+        // return std::vector<EdgeWeight>{range.begin(), range.end()};
+        return range;
     }
 
     virtual std::vector<EdgeWeight>

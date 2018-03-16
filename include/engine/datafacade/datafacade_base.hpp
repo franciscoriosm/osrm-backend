@@ -25,12 +25,14 @@
 #include "util/guidance/entry_class.hpp"
 #include "util/guidance/turn_lanes.hpp"
 #include "util/integer_range.hpp"
+#include "util/packed_vector.hpp"
 #include "util/string_util.hpp"
 #include "util/string_view.hpp"
 #include "util/typedefs.hpp"
 
-#include "osrm/coordinate.hpp"
+#include "osrm/coordinate.hpp" // also searches in local directory (include directory in this project)
 
+#include <boost/range/adaptor/reversed.hpp> // only in system directories (specified with -I param)
 #include <cstddef>
 
 #include <string>
@@ -77,10 +79,28 @@ class BaseDataFacade
     virtual std::vector<EdgeWeight> GetUncompressedForwardWeights(const EdgeID id) const = 0;
     virtual std::vector<EdgeWeight> GetUncompressedReverseWeights(const EdgeID id) const = 0;
 
-    // Gets the duration values for each segment in an uncompressed geometry.
-    // Should always be 1 shorter than GetUncompressedGeometry
+    // // Gets the duration values for each segment in an uncompressed geometry.
+    // // Should always be 1 shorter than GetUncompressedGeometry
     virtual std::vector<EdgeWeight> GetUncompressedForwardDurations(const EdgeID id) const = 0;
     virtual std::vector<EdgeWeight> GetUncompressedReverseDurations(const EdgeID id) const = 0;
+
+    // Gets the duration values for each segment in an uncompressed geometry.
+    // Should always be 1 shorter than GetUncompressedGeometry
+    using forwardRangeT = boost::iterator_range<
+        osrm::util::detail::PackedVector<unsigned int, 22ul, (osrm::storage::Ownership)1>::
+            iterator_impl<unsigned int const,
+                          osrm::util::detail::
+                              PackedVector<unsigned int, 22ul, (osrm::storage::Ownership)1> const,
+                          unsigned int>>;
+    virtual forwardRangeT GetUncompressedForwardDurations1(const EdgeID id) const = 0;
+
+    using reverseRangeT = boost::range_detail::reversed_range<const boost::iterator_range<
+        osrm::util::detail::PackedVector<unsigned int, 22, osrm::storage::Ownership::View>::
+            iterator_impl<const unsigned int,
+                          const osrm::util::detail::
+                              PackedVector<unsigned int, 22, osrm::storage::Ownership::View>,
+                          unsigned int>>>;
+    virtual reverseRangeT GetUncompressedReverseDurations1(const EdgeID id) const = 0;
 
     // Returns the data source ids that were used to supply the edge
     // weights.  Will return an empty array when only the base profile is used.
